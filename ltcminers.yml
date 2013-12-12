@@ -13,6 +13,9 @@
   - name: setup development tools
     yum: name="@Development tools" state=present
     sudo: yes
+  - name: setup latest kernel headers
+    shell: yum -y install kernel-devel-`uname -r`
+    sudo: yes
   - name: setup cuda packages
     command: yum -y install git libcurl-devel python-devel screen rsync yasm numpy openssl-devel
     sudo: yes
