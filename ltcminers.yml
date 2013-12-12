@@ -43,7 +43,8 @@
   - name: clone stratum-mining-proxy
     git: repo=https://github.com/bandroidx/stratum-mining-proxy dest=/home/ec2-user/stratum-mining-proxy
   - name: setup stratum-mining-proxy
-    command: sh -c "sudo python distribute_setup.py && cd litecoin_scrypt/ && sudo python setup.py install && cd .. && sudo python setup.py develop && chmod +x mining_proxy.py" chdir=/home/ec2-user/stratum-mining-proxy
+    command: sh -c "python distribute_setup.py && cd litecoin_scrypt/ && python setup.py install && cd .. && python setup.py develop && chmod +x mining_proxy.py" chdir=/home/ec2-user/stratum-mining-proxy
+    sudo: true
   - name: stop stratum-mining-proxy
     shell: ps ax | grep mining_proxy | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
   - name: run stratum-mining-proxy
