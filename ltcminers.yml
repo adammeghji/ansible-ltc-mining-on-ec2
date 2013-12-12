@@ -25,7 +25,7 @@
     action: command sh cuda_5.5.22_linux_64.run -silent -toolkit -driver chdir=/tmp creates=/usr/local/cuda-5.5
     sudo: yes
   - name: clone CudaMiner
-    git: repo=https://github.com/cbuchner1/CudaMiner dest=/home/ec2-user/CudaMiner
+    git: repo=https://github.com/cbuchner1/CudaMiner version=88c6da6d5c2b798d1de7031e8dbcc2678f635e4b dest=/home/ec2-user/CudaMiner
   - name: configure cudaminer
     action: command ./configure chdir=/home/ec2-user/CudaMiner
     sudo: yes
