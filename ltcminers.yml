@@ -53,5 +53,7 @@
     shell: ps ax | grep {{gpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
   - name: run cudaminer_gpu
     shell: nohup sh -c "/usr/bin/env LD_LIBRARY_PATH=/usr/local/cuda-5.5/lib64 ./cudaminer -o stratum+tcp://us3.wemineltc.com:3333 -u {{gpu_worker_name}} -p {{gpu_worker_pass}} -C 1 > /home/ec2-user/cudaminer_gpu.out 2> /home/ec2-user/cudaminer_gpu.err < /dev/null &" chdir=/home/ec2-user/CudaMiner
+  - name: stop cpu miner
+    shell: ps ax | grep {{cpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
   - name: run cpu miner
     command: nohup sh -c "./minerd -o http://127.0.0.1:8332 -u {{cpu_worker_name}} -p {{cpu_worker_pass}} -t 6 > /home/ec2-user/cpu_miner.out 2> /home/ec2-user/cpu_miner.err < /dev/null &" chdir=/home/ec2-user/cpuminer
