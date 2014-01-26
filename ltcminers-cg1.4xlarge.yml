@@ -1,0 +1,59 @@
+---
+- hosts: ltcminers
+  remote_user: ec2-user
+  vars:
+    gpu_worker_name: marmsu.gpu
+    gpu_worker_pass: m41w0rk3r
+    cpu_worker_name: marmsu.cpu
+    cpu_worker_pass: m41w0rk3r
+  tasks:
+  - name: system update
+    yum: name="*"
+    sudo: yes
+  - name: setup development tools
+    yum: name="@Development tools" state=present
+    sudo: yes
+  - name: setup latest kernel headers
+    shell: yum -y install kernel-devel-`uname -r`
+    sudo: yes
+  - name: setup cuda packages
+    command: yum -y install git libcurl-devel python-devel screen rsync yasm numpy openssl-devel
+    sudo: yes
+  - name: download cuda source
+    action: command wget -O /tmp/cuda_5.5.22_linux_64.run http://developer.download.nvidia.com/compute/cuda/5_5/rel/installers/cuda_5.5.22_linux_64.run creates=/tmp/cuda_5.5.22_linux_64.run
+  - name: install cuda
+    action: command sh cuda_5.5.22_linux_64.run -silent -toolkit -driver chdir=/tmp creates=/usr/local/cuda-5.5
+    sudo: yes
+  - name: clone CudaMiner
+    git: repo=https://github.com/cbuchner1/CudaMiner version=88c6da6d5c2b798d1de7031e8dbcc2678f635e4b dest=/home/ec2-user/CudaMiner
+  - name: configure cudaminer
+    action: command ./configure chdir=/home/ec2-user/CudaMiner
+    sudo: yes
+  - name: make cudaminer
+    action: command sh -c "export PATH=$PATH:/usr/local/cuda-5.5/bin && cd /home/ec2-user/CudaMiner && make"
+    sudo: true
+  - name: clone cpuminer
+    git: repo=https://github.com/pooler/cpuminer dest=/home/ec2-user/cpuminer/
+  - name: setup cpuminer
+    command: ./autogen.sh chdir=/home/ec2-user/cpuminer/
+  - name: configure cpuminer
+    command: ./configure CFLAGS="-O3" chdir=/home/ec2-user/cpuminer/
+  - name: make cpuminer
+    command: make chdir=/home/ec2-user/cpuminer/
+  - name: clone stratum-mining-proxy
+    git: repo=https://github.com/bandroidx/stratum-mining-proxy dest=/home/ec2-user/stratum-mining-proxy
+  - name: setup stratum-mining-proxy
+    command: sh -c "python distribute_setup.py && cd litecoin_scrypt/ && python setup.py install && cd .. && python setup.py develop && chmod +x mining_proxy.py" chdir=/home/ec2-user/stratum-mining-proxy
+    sudo: true
+  - name: stop stratum-mining-proxy
+    shell: ps ax | grep mining_proxy | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
+  - name: run stratum-mining-proxy
+    shell: nohup sh -c "./mining_proxy.py -o stratum2.wemineltc.com -p 3333 > /home/ec2-user/stratum-mining-proxy.out 2> /home/ec2-user/stratum-mining-proxy.err < /dev/null &" chdir=/home/ec2-user/stratum-mining-proxy
+  - name: stop cudaminer_gpu
+    shell: ps ax | grep {{gpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
+  - name: run cudaminer_gpu
+    shell: nohup sh -c "/usr/bin/env LD_LIBRARY_PATH=/usr/local/cuda-5.5/lib64 ./cudaminer -d 0,1 -l auto,auto -o stratum+tcp://us3.wemineltc.com:3333 -u {{gpu_worker_name}} -p {{gpu_worker_pass}} -C 1,1 > /home/ec2-user/cudaminer_gpu.out 2> /home/ec2-user/cudaminer_gpu.err < /dev/null &" chdir=/home/ec2-user/CudaMiner
+  - name: stop cpu miner
+    shell: ps ax | grep {{cpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
+  - name: run cpu miner
+    command: nohup sh -c "./minerd -o http://127.0.0.1:8332 -u {{cpu_worker_name}} -p {{cpu_worker_pass}} -t 14 > /home/ec2-user/cpu_miner.out 2> /home/ec2-user/cpu_miner.err < /dev/null &" chdir=/home/ec2-user/cpuminer
