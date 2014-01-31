@@ -1,0 +1,3 @@
+---
+cudaminer_opts: -C 1
+minerd_opts: -t 7

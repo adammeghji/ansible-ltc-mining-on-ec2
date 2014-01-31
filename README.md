@@ -32,10 +32,10 @@ Setup
 
 Usage
 -----
-  1. Bid and launch g2.2xlarge instances, via the [Amazon Linux AMI (HVM) 2013.09.1](http://aws.amazon.com/amazon-linux-ami/2013.09-release-notes/) image.
-  2. Add your new EC2 instance hostnames to ````inventory.yml````
+  1. Bid and launch g2.2xlarge (or cg1.4xlarge) instances, via the [Amazon Linux AMI (HVM) 2013.09.1](http://aws.amazon.com/amazon-linux-ami/2013.09-release-notes/) image.
+  2. Add your new EC2 instance hostnames to ````inventory.yml```` under the appropriate instance type group.
   3. Save the necessary keypairs locally to ````$HOME/.ssh/aws.pem```` (or configure PEM_FILE in the Makefile)
-  4. Configure GPU & CPU worker credentials in ````ltcminers.yml````
+  4. Configure GPU & CPU worker credentials in ````group_vars / all````
   5. Run ````make run````
      - Installs ansible
      - Runs the ````ltcminers.yml```` playbook

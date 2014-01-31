@@ -1,2 +1,7 @@
-[ltcminers]
-ec2-some-hostname.compute-1.amazonaws.com
+[cg1.4xlarge]
+#ec2-some-cg1.4xlarge-hostname.compute-1.amazonaws.com
+
+[c2.2xlarge]
+#ec2-some-c2.2xlarge-hostname.compute-1.amazonaws.com
+#ec2-23-22-185-173.compute-1.amazonaws.com
+
