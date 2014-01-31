@@ -1,0 +1,5 @@
+---
+gpu_worker_name: marmsu.gpu
+gpu_worker_pass: m41w0rk3r
+cpu_worker_name: marmsu.cpu
+cpu_worker_pass: m41w0rk3r

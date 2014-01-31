@@ -1,11 +1,6 @@
 ---
-- hosts: ltcminers
+- hosts: all
   remote_user: ec2-user
-  vars:
-    gpu_worker_name: marmsu.gpu
-    gpu_worker_pass: m41w0rk3r
-    cpu_worker_name: marmsu.cpu
-    cpu_worker_pass: m41w0rk3r
   tasks:
   - name: system update
     yum: name="*"
@@ -25,7 +20,7 @@
     action: command sh cuda_5.5.22_linux_64.run -silent -toolkit -driver chdir=/tmp creates=/usr/local/cuda-5.5
     sudo: yes
   - name: clone CudaMiner
-    git: repo=https://github.com/cbuchner1/CudaMiner version=88c6da6d5c2b798d1de7031e8dbcc2678f635e4b dest=/home/ec2-user/CudaMiner
+    git: repo=https://github.com/cbuchner1/CudaMiner version=e244a6296f5aa7f1c2ca8151841cd2438c139bd8 dest=/home/ec2-user/CudaMiner
   - name: configure cudaminer
     action: command ./configure chdir=/home/ec2-user/CudaMiner
     sudo: yes
@@ -52,6 +47,8 @@
   - name: stop cudaminer_gpu
     shell: ps ax | grep {{gpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
   - name: run cudaminer_gpu
-    shell: nohup sh -c "/usr/bin/env LD_LIBRARY_PATH=/usr/local/cuda-5.5/lib64 ./cudaminer -o stratum+tcp://us3.wemineltc.com:3333 -u {{gpu_worker_name}} -p {{gpu_worker_pass}} -C 1 > /home/ec2-user/cudaminer_gpu.out 2> /home/ec2-user/cudaminer_gpu.err < /dev/null &" chdir=/home/ec2-user/CudaMiner
+    shell: nohup sh -c "/usr/bin/env LD_LIBRARY_PATH=/usr/local/cuda-5.5/lib64 ./cudaminer -o stratum+tcp://us3.wemineltc.com:3333 -u {{gpu_worker_name}} -p {{gpu_worker_pass}} {{cudaminer_opts}} > /home/ec2-user/cudaminer_gpu.out 2> /home/ec2-user/cudaminer_gpu.err < /dev/null &" chdir=/home/ec2-user/CudaMiner
+  - name: stop cpu miner
+    shell: ps ax | grep {{cpu_worker_name}} | grep -v grep | awk '{print $1}' | xargs kill || /bin/true
   - name: run cpu miner
-    command: nohup sh -c "./minerd -o http://127.0.0.1:8332 -u {{cpu_worker_name}} -p {{cpu_worker_pass}} -t 6 > /home/ec2-user/cpu_miner.out 2> /home/ec2-user/cpu_miner.err < /dev/null &" chdir=/home/ec2-user/cpuminer
+    command: nohup sh -c "./minerd -o http://127.0.0.1:8332 -u {{cpu_worker_name}} -p {{cpu_worker_pass}} {{minerd_opts}} > /home/ec2-user/cpu_miner.out 2> /home/ec2-user/cpu_miner.err < /dev/null &" chdir=/home/ec2-user/cpuminer
